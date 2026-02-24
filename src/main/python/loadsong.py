@@ -68,17 +68,42 @@ def midi_to_json(midi_file_path, track_filter=None):
         if track_filter is None:
             raise Exception("No suitable melodic track found")
 
-    # Get tempo
-    tempo = 500000  # Default: 120 BPM
     ticks_per_beat = mid.ticks_per_beat
 
+    # Build tempo map from all tracks, sorted by tick position
+    tempo_map = []
     for track in mid.tracks:
+        cumulative_ticks = 0
         for msg in track:
+            cumulative_ticks += msg.time
             if msg.type == "set_tempo":
-                tempo = msg.tempo
-                break
+                tempo_map.append((cumulative_ticks, msg.tempo))
 
-    bpm = 60000000 / tempo
+    tempo_map.sort(key=lambda x: x[0])
+    if not tempo_map:
+        tempo_map = [(0, 500000)]  # default 120 BPM
+
+    print(f"\nTempo map ({len(tempo_map)} event(s)):")
+    for tick, t in tempo_map:
+        print(f"  {60000000 / t:.2f} BPM at tick {tick}")
+
+    # Convert absolute tick position to seconds using the tempo map
+    def ticks_to_seconds(tick):
+        seconds = 0
+        prev_tick = 0
+        current_tempo = 500000
+        for map_tick, map_tempo in tempo_map:
+            if map_tick >= tick:
+                break
+            seconds += mido.tick2second(
+                map_tick - prev_tick, ticks_per_beat, current_tempo
+            )
+            prev_tick = map_tick
+            current_tempo = map_tempo
+        seconds += mido.tick2second(tick - prev_tick, ticks_per_beat, current_tempo)
+        return seconds
+
+    bpm = 60000000 / tempo_map[0][1]
     total_time = mid.length
 
     # Collect all notes from selected track
@@ -90,7 +115,7 @@ def midi_to_json(midi_file_path, track_filter=None):
         current_time += msg.time
 
         if msg.type == "note_on" and msg.velocity > 0:
-            time_seconds = mido.tick2second(current_time, ticks_per_beat, tempo)
+            time_seconds = ticks_to_seconds(current_time)
             all_notes.append(
                 {
                     "time": float(time_seconds),

@@ -1,4 +1,4 @@
-package RiffHero;
+package RiffHero.client;
 
 import java.util.ArrayList;
 
@@ -7,16 +7,18 @@ class Song {
   private String name;
   private String jsonPath;
   private String audioPath;
+  private double offSet;
   private double duration;
   private double tempo;
   private ArrayList<Note> notes;
 
-  public Song(String name, String jsonPath, double duration, double tempo) {
+  public Song(String name, String jsonPath, double duration, double tempo, double offSet) {
     this.name = name;
     this.jsonPath = jsonPath;
-    this.audioPath = "byob.mp3";
+    this.audioPath = "scarlet.wav";
     this.duration = duration;
     this.tempo = tempo;
+    this.offSet = offSet;
     notes = new ArrayList<>();
   }
 
@@ -25,10 +27,18 @@ class Song {
   }
 
   public ArrayList<Note> getNotes() {
-      return notes;
+    return notes;
   }
 
   public String getAudioPath() {
-      return audioPath;
+    return audioPath;
+  }
+
+  public void setOffSet(double offSet) {
+    this.offSet = offSet;
+  }
+
+  public double getOffSet() {
+    return offSet;
   }
 }

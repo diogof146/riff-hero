@@ -1,4 +1,4 @@
-package RiffHero;
+package RiffHero.client;
 
 import java.util.Map;
 
@@ -13,14 +13,10 @@ public class Main extends GameApplication {
 
   private static GameManager game = new GameManager();
 
-  // protected void initGame() {
-  // game.createPlayer();
-  // }
-
   @Override
   protected void initSettings(GameSettings settings) {
-    settings.setWidth(600);
-    settings.setHeight(600);
+    settings.setWidth(1000);
+    settings.setHeight(566);
     settings.setTitle("Riff Hero");
   }
 
@@ -36,12 +32,12 @@ public class Main extends GameApplication {
 
   @Override
   protected void initGameVars(Map<String, Object> vars) {
-    vars.put("pixelsMoved", 0);
+    vars.put("score", 0);
   }
 
   @Override
   protected void onUpdate(double tpf) {
-    game.updateGameplay(tpf);
+    game.updateGameplay();
   }
 
   public static void main(String[] args) {
